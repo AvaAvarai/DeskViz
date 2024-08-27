@@ -5,23 +5,52 @@ document.addEventListener("DOMContentLoaded", () => {
     const about = document.getElementById('about');
     const seeCode = document.getElementById('see-code');
     const loadCsv = document.getElementById('load-csv');
+    const openTableView = document.getElementById('open-table-view');
     const fileInput = document.getElementById('file-input');
     const statsPanel = document.getElementById('stats-panel');
     const tableView = document.getElementById('table-view');
+    const tableWindow = document.getElementById('table-window');
+    const closeBtn = document.getElementById('close-btn');
+    // Toggle start menu
     startButton.addEventListener('click', () => {
         startMenu.classList.toggle('hidden');
     });
     about.addEventListener('click', () => {
-        alert('This is DeskViz, a simulated desktop application for data visualization.');
+        alert('This is VizDesk, a simulated desktop application for data visualization.');
         startMenu.classList.add('hidden');
     });
     seeCode.addEventListener('click', () => {
-        window.open('https://github.com/AvaAvarai/DeskViz', '_blank');
+        window.open('https://github.com/AvaAvarai/VizDesk', '_blank');
         startMenu.classList.add('hidden');
     });
     loadCsv.addEventListener('click', () => {
         fileInput.click();
         startMenu.classList.add('hidden');
+    });
+    openTableView.addEventListener('click', () => {
+        tableWindow.classList.remove('hidden');
+        startMenu.classList.add('hidden');
+    });
+    closeBtn.addEventListener('click', () => {
+        tableWindow.classList.add('hidden');
+    });
+    // Dragging the window
+    let isDragging = false;
+    let offsetX = 0, offsetY = 0;
+    const windowHeader = tableWindow.querySelector('.window-header');
+    windowHeader.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - tableWindow.offsetLeft;
+        offsetY = e.clientY - tableWindow.offsetTop;
+    });
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            tableWindow.style.left = `${e.clientX - offsetX}px`;
+            tableWindow.style.top = `${e.clientY - offsetY}px`;
+        }
+    });
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
     });
     fileInput.addEventListener('change', (event) => {
         var _a;
@@ -34,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const stats = calculateStats(parsedData, file.name, file.size);
                 showStatsPanel(stats);
                 renderTable(parsedData);
+                tableWindow.classList.remove('hidden'); // Show window when data is loaded
             };
             reader.readAsText(file);
         }

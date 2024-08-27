@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeskViz</title>
+    <title>VizDesk</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="stats-panel" class="hidden">
-        <span id="dataset-name"></span> |
-        <span id="case-count"></span> cases |
-        <span id="attribute-count"></span> attributes |
-        <span id="class-count"></span> unique classes |
-        <span id="dataset-size"></span> KB
-    </div>
-
     <div id="desktop">
-        <!-- Placeholder for the desktop background and icons -->
+        <!-- Stats panel -->
+        <div id="stats-panel" class="hidden"></div>
+        
+        <!-- Table view window -->
+        <div id="table-window" class="window hidden">
+            <div class="window-header">
+                <span id="window-title">Table View</span>
+                <span class="window-controls">
+                    <button id="close-btn">X</button>
+                </span>
+            </div>
+            <div id="table-view" class="window-content"></div>
+        </div>
     </div>
     <div id="taskbar">
         <div id="start-button">Start</div>
@@ -25,16 +29,11 @@
                 <li id="about">About</li>
                 <li id="see-code">See the Code</li>
                 <li id="load-csv">Load CSV</li>
+                <li id="open-table-view">Open Table View</li>
             </ul>
         </div>
     </div>
-
-    <!-- Hidden file input for loading CSV -->
-    <input type="file" id="file-input" accept=".csv" style="display:none;">
-
-    <!-- Container for the table view -->
-    <div id="table-view" class="hidden"></div>
-
-    <script src="./dist/index.js"></script>
+    <input type="file" id="file-input" class="hidden">
+    <script src="dist/index.js"></script>
 </body>
 </html>
