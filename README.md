@@ -6,8 +6,8 @@ Utilizing Visual Knwoledge Discovery and Machine Learning techniques developed a
 
 [Current Live Version Here (data still processed locally on your device.)](https://avaavarai.github.io/VizDesk/)
 
-![Early concept screenshot](early_concept_screenshot.png)
-![Early screenshot](early_screenshot.png)
+![Early screenshot 1](early_screenshot1.png)
+![Early screenshot 2](early_screenshot2.png)
 
 ## Data Format
 
