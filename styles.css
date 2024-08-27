@@ -103,12 +103,10 @@ th, td {
 }
 
 #desktop {
-    position: absolute;
-    top: 50px; /* Height of the stats panel */
-    bottom: 40px; /* Height of the taskbar */
+    height: 100%;
     width: 100%;
     overflow: hidden;
-    background-color: hsl(188, 100%, 42%); /* Background color for the desktop */
+    background-color: hsl(188, 100%, 42%);
 }
 
 .window-header {

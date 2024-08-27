@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     function showStatsPanel(stats) {
         statsPanel.innerHTML = `
-            Dataset: ${stats.fileName} |
+            Currently loaded dataset: ${stats.fileName} |
             ${stats.caseCount} cases |
             ${stats.attributeCount} attributes |
             ${stats.classCount} unique classes |
