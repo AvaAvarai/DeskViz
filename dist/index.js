@@ -142,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         const uniqueClasses = Array.from(new Set(rows.map(row => row[classIndex])));
-        console.log("Unique Classes:", uniqueClasses);
         // Generate distinct colors for each class
         const classColors = generateClassColors(uniqueClasses.length);
         // Map each class to its color
@@ -163,6 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 dimensions: dimensions,
             },
         ];
+        // Dynamically adjust the width of the plot based on the number of dimensions
+        const plotWidth = Math.max(1000, 100 * headers.length); // Scale the width by the number of attributes
         const layout = {
             title: {
                 text: 'Parallel Coordinates Plot',
@@ -172,7 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 xref: 'paper',
                 x: 0.05,
             },
-            margin: { l: 50, r: 50, t: 100, b: 50 }, // Increase top margin to avoid overlap
+            autosize: false,
+            width: plotWidth, // Set the width dynamically
+            margin: { l: 50, r: 50, t: 100, b: 50 }, // Adjust margins if necessary
         };
         Plotly.newPlot(parallelView, plotData, layout);
     }
