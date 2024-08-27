@@ -20,6 +20,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const parallelView = document.getElementById('parallel-view') as HTMLElement;
     const parallelCloseBtn = document.getElementById('parallel-close-btn') as HTMLElement;
 
+    // Global z-index tracker
+    let highestZIndex = 1;
+
+    // Function to bring a window to the foreground
+    function bringToForeground(windowElement: HTMLElement) {
+        highestZIndex += 1;
+        windowElement.style.zIndex = highestZIndex.toString();
+    }
+
+    // Bring windows to foreground when clicked
+    [tableWindow, parallelWindow].forEach(window => {
+        window.addEventListener('mousedown', () => bringToForeground(window));
+    });
+
     // Toggle start menu
     startButton.addEventListener('click', () => {
         startMenu.classList.toggle('hidden');
@@ -43,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     openTableView.addEventListener('click', () => {
         tableWindow.classList.remove('hidden');
         startMenu.classList.add('hidden');
+        bringToForeground(tableWindow); // Ensure it is brought to the foreground when opened
     });
 
     closeBtn.addEventListener('click', () => {
@@ -53,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
         parallelWindow.classList.remove('hidden');
         startMenu.classList.add('hidden');
         renderParallelCoordinatesD3Canvas(parsedData); // Updated function call
+        bringToForeground(parallelWindow); // Ensure it is brought to the foreground when opened
     });
 
     parallelCloseBtn.addEventListener('click', () => {
@@ -68,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             isDragging = true;
             offsetX = e.clientX - windowElement.offsetLeft;
             offsetY = e.clientY - windowElement.offsetTop;
+            bringToForeground(windowElement); // Bring to foreground when dragging starts
         });
 
         document.addEventListener('mousemove', (e: MouseEvent) => {
@@ -99,6 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showStatsPanel(stats);
                 renderTable(parsedData);
                 tableWindow.classList.remove('hidden'); // Show window when data is loaded
+                bringToForeground(tableWindow); // Ensure it is brought to the foreground when loaded
             };
             reader.readAsText(file);
         }
@@ -156,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tableView.appendChild(table);
         tableView.classList.remove('hidden');
     }
-
+    
     function renderParallelCoordinatesD3Canvas(data: string[][]) {
         const canvas = document.getElementById('parallelCanvas') as HTMLCanvasElement;
         const ctx = canvas.getContext('2d')!;

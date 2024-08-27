@@ -17,6 +17,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const parallelWindow = document.getElementById('parallel-window');
     const parallelView = document.getElementById('parallel-view');
     const parallelCloseBtn = document.getElementById('parallel-close-btn');
+    // Global z-index tracker
+    let highestZIndex = 1;
+    // Function to bring a window to the foreground
+    function bringToForeground(windowElement) {
+        highestZIndex += 1;
+        windowElement.style.zIndex = highestZIndex.toString();
+    }
+    // Bring windows to foreground when clicked
+    [tableWindow, parallelWindow].forEach(window => {
+        window.addEventListener('mousedown', () => bringToForeground(window));
+    });
     // Toggle start menu
     startButton.addEventListener('click', () => {
         startMenu.classList.toggle('hidden');
@@ -36,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     openTableView.addEventListener('click', () => {
         tableWindow.classList.remove('hidden');
         startMenu.classList.add('hidden');
+        bringToForeground(tableWindow); // Ensure it is brought to the foreground when opened
     });
     closeBtn.addEventListener('click', () => {
         tableWindow.classList.add('hidden');
@@ -44,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         parallelWindow.classList.remove('hidden');
         startMenu.classList.add('hidden');
         renderParallelCoordinatesD3Canvas(parsedData); // Updated function call
+        bringToForeground(parallelWindow); // Ensure it is brought to the foreground when opened
     });
     parallelCloseBtn.addEventListener('click', () => {
         parallelWindow.classList.add('hidden');
@@ -56,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
             isDragging = true;
             offsetX = e.clientX - windowElement.offsetLeft;
             offsetY = e.clientY - windowElement.offsetTop;
+            bringToForeground(windowElement); // Bring to foreground when dragging starts
         });
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
@@ -83,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showStatsPanel(stats);
                 renderTable(parsedData);
                 tableWindow.classList.remove('hidden'); // Show window when data is loaded
+                bringToForeground(tableWindow); // Ensure it is brought to the foreground when loaded
             };
             reader.readAsText(file);
         }
