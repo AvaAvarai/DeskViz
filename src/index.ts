@@ -160,30 +160,83 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderParallelCoordinates(data: string[][]) {
         const headers = data[0];
         const rows = data.slice(1);
+        
+        // Identify class column and unique classes
+        const classIndex = headers.findIndex(header => header.toLowerCase() === 'class');
+        if (classIndex === -1) {
+            console.error("Class column not found!");
+            return;
+        }
+        
+        const uniqueClasses = Array.from(new Set(rows.map(row => row[classIndex])));
+        console.log("Unique Classes:", uniqueClasses);
     
+        // Generate distinct colors for each class
+        const classColors = generateClassColors(uniqueClasses.length);
+    
+        // Map each class to its color
+        const classColorMap = new Map(uniqueClasses.map((cls, i) => [cls, classColors[i]]));
+    
+        // Assign a numerical value to each class for coloring
+        const colorValues = rows.map(row => uniqueClasses.indexOf(row[classIndex]));
+        
         const dimensions = headers.map((header, index) => ({
             label: header,
-            values: rows.map(row => parseFloat(row[index]) || 0), // Convert strings to numbers
+            values: rows.map(row => index === classIndex ? uniqueClasses.indexOf(row[index]) : parseFloat(row[index]) || 0), // Map class to numeric index
         }));
-    
-        const colors = rows.map(() => Math.random()); // Generate random colors
     
         const plotData = [
             {
                 type: 'parcoords',
                 line: {
-                    color: colors,
-                    colorscale: 'Viridis',  // Color scale for lines
+                    color: colorValues, // Use the numerical class index for colors
+                    colorscale: uniqueClasses.map((cls, i) => [i / (uniqueClasses.length - 1), classColorMap.get(cls)]), // Map colorscale to class colors
                 },
                 dimensions: dimensions,
             },
         ];
     
         const layout = {
-            title: 'Parallel Coordinates Plot',
-            margin: { l: 50, r: 50, t: 100, b: 50 },
+            title: {
+                text: 'Parallel Coordinates Plot',
+                font: {
+                    size: 18,
+                },
+                xref: 'paper',
+                x: 0.05,
+            },
+            margin: { l: 50, r: 50, t: 100, b: 50 }, // Increase top margin to avoid overlap
         };
     
         Plotly.newPlot(parallelView, plotData, layout);
     }    
+    
+    function generateClassColors(numClasses: number): string[] {
+        return Array.from({ length: numClasses }, (_, i) => {
+            const hue = i / numClasses;
+            const rgb = HSVtoRGB(hue, 1, 1);
+            return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+        });
+    }
+    
+    function HSVtoRGB(h: number, s: number, v: number): [number, number, number] {
+        const i = Math.floor(h * 6);
+        const f = h * 6 - i;
+        const p = v * (1 - s);
+        const q = v * (1 - f * s);
+        const t = v * (1 - (1 - f) * s);
+    
+        let r = 0, g = 0, b = 0; // Initialize with default values
+    
+        switch (i % 6) {
+            case 0: r = v, g = t, b = p; break;
+            case 1: r = q, g = v, b = p; break;
+            case 2: r = p, g = v, b = t; break;
+            case 3: r = p, g = q, b = v; break;
+            case 4: r = t, g = p, b = v; break;
+            case 5: r = v, g = p, b = q; break;
+        }
+    
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
 });
