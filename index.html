@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="stats-panel" class="hidden">
+        <span id="dataset-name"></span> |
+        <span id="case-count"></span> cases |
+        <span id="attribute-count"></span> attributes |
+        <span id="class-count"></span> unique classes |
+        <span id="dataset-size"></span> KB
+    </div>
+
     <div id="desktop">
         <!-- Placeholder for the desktop background and icons -->
     </div>
@@ -20,5 +28,13 @@
             </ul>
         </div>
     </div>
+
+    <!-- Hidden file input for loading CSV -->
+    <input type="file" id="file-input" accept=".csv" style="display:none;">
+
+    <!-- Container for the table view -->
+    <div id="table-view" class="hidden"></div>
+
     <script src="./dist/index.js"></script>
+</body>
 </html>
