@@ -86,21 +86,44 @@ document.addEventListener("DOMContentLoaded", () => {
     function makeDraggable(header: HTMLElement, windowElement: HTMLElement) {
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
-
+    
         header.addEventListener('mousedown', (e: MouseEvent) => {
             isDragging = true;
             offsetX = e.clientX - windowElement.offsetLeft;
             offsetY = e.clientY - windowElement.offsetTop;
             bringToForeground(windowElement); // Bring to foreground when dragging starts
         });
-
+    
         document.addEventListener('mousemove', (e: MouseEvent) => {
             if (isDragging) {
-                windowElement.style.left = `${e.clientX - offsetX}px`;
-                windowElement.style.top = `${e.clientY - offsetY}px`;
+                const desktop = document.getElementById('desktop') as HTMLElement;
+                const desktopRect = desktop.getBoundingClientRect();
+                const windowRect = windowElement.getBoundingClientRect();
+    
+                // Calculate new position
+                let newLeft = e.clientX - offsetX;
+                let newTop = e.clientY - offsetY;
+    
+                // Boundary checks
+                if (newLeft < desktopRect.left) {
+                    newLeft = desktopRect.left;
+                }
+                if (newTop < desktopRect.top + document.getElementById('stats-panel')!.offsetHeight) {
+                    newTop = desktopRect.top + document.getElementById('stats-panel')!.offsetHeight;
+                }
+                if (newLeft + windowRect.width > desktopRect.right) {
+                    newLeft = desktopRect.right - windowRect.width;
+                }
+                if (newTop + windowRect.height > desktopRect.bottom - document.getElementById('taskbar')!.offsetHeight) {
+                    newTop = desktopRect.bottom - windowRect.height - document.getElementById('taskbar')!.offsetHeight;
+                }
+    
+                // Set new position
+                windowElement.style.left = `${newLeft}px`;
+                windowElement.style.top = `${newTop}px`;
             }
         });
-
+    
         document.addEventListener('mouseup', () => {
             isDragging = false;
         });
