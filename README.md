@@ -1,6 +1,8 @@
 # VizDesk
 
-What if there was a locally 🏠 sessioned computer desktop 🖥️ metaphor for data science 📈 and visualization tools 🛠️?
+[This project is currently under construction. 🚧]
+What if there was a local 🏠 desktop 🖥️ metaphor for data science 📈 and visualization 🛠️?
+Utilizing Visual Knwoledge Discovery and Machine Learning techniques developed at @CWU-VKD-LAB in a user-accessible and intuitive platform.
 
 [Current Live Version Here (data still processed locally on your device.)](https://avaavarai.github.io/VizDesk/)
 

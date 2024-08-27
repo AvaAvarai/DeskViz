@@ -12,6 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableView = document.getElementById('table-view');
     const tableWindow = document.getElementById('table-window');
     const closeBtn = document.getElementById('close-btn');
+    const aboutWindow = document.getElementById('about-window');
+    const aboutCloseBtn = document.getElementById('about-close-btn');
     // Parallel coordinates elements
     const openParallelView = document.getElementById('open-parallel-view');
     const parallelWindow = document.getElementById('parallel-window');
@@ -33,8 +35,12 @@ document.addEventListener("DOMContentLoaded", () => {
         startMenu.classList.toggle('hidden');
     });
     about.addEventListener('click', () => {
-        alert('What if there was a locally 🏠 sessioned computer desktop 🖥️ metaphor for data science 📈 and visualization tools 🛠️?');
+        aboutWindow.classList.remove('hidden');
+        bringToForeground(aboutWindow); // Bring the About window to the top
         startMenu.classList.add('hidden');
+    });
+    aboutCloseBtn.addEventListener('click', () => {
+        aboutWindow.classList.add('hidden');
     });
     seeCode.addEventListener('click', () => {
         window.open('https://github.com/AvaAvarai/VizDesk', '_blank');

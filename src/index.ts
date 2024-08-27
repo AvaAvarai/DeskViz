@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableView = document.getElementById('table-view') as HTMLElement;
     const tableWindow = document.getElementById('table-window') as HTMLElement;
     const closeBtn = document.getElementById('close-btn') as HTMLElement;
+    const aboutWindow = document.getElementById('about-window') as HTMLElement;
+    const aboutCloseBtn = document.getElementById('about-close-btn') as HTMLElement;
 
     // Parallel coordinates elements
     const openParallelView = document.getElementById('open-parallel-view') as HTMLElement;
@@ -40,8 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     about.addEventListener('click', () => {
-        alert('What if there was a locally 🏠 sessioned computer desktop 🖥️ metaphor for data science 📈 and visualization tools 🛠️?');
+        aboutWindow.classList.remove('hidden');
+        bringToForeground(aboutWindow); // Bring the About window to the top
         startMenu.classList.add('hidden');
+    });
+
+    aboutCloseBtn.addEventListener('click', () => {
+        aboutWindow.classList.add('hidden');
     });
 
     seeCode.addEventListener('click', () => {
