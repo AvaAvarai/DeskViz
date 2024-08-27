@@ -1,6 +1,11 @@
-"use strict";
+import { toggleStartMenu } from './ui/startMenu.js';
+import { makeDraggable } from './ui/draggable.js';
+import { showStatsPanel } from './ui/statsPanel.js';
+import { generateClassColors } from './data/colorUtils.js';
+import { calculateStats } from './data/dataProcessing.js';
+import { handleFileInput } from './data/fileHandler.js';
 document.addEventListener("DOMContentLoaded", () => {
-    // Existing elements
+    // Get elements
     const startButton = document.getElementById('start-button');
     const startMenu = document.getElementById('start-menu');
     const about = document.getElementById('about');
@@ -14,29 +19,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeBtn = document.getElementById('close-btn');
     const aboutWindow = document.getElementById('about-window');
     const aboutCloseBtn = document.getElementById('about-close-btn');
-    // Parallel coordinates elements
     const openParallelView = document.getElementById('open-parallel-view');
     const parallelWindow = document.getElementById('parallel-window');
     const parallelView = document.getElementById('parallel-view');
     const parallelCloseBtn = document.getElementById('parallel-close-btn');
-    // Global z-index tracker
     let highestZIndex = 1;
-    // Function to bring a window to the foreground
+    let parsedData;
     function bringToForeground(windowElement) {
         highestZIndex += 1;
         windowElement.style.zIndex = highestZIndex.toString();
     }
-    // Bring windows to foreground when clicked
-    [tableWindow, parallelWindow].forEach(window => {
+    [tableWindow, parallelWindow, aboutWindow].forEach(window => {
         window.addEventListener('mousedown', () => bringToForeground(window));
     });
-    // Toggle start menu
-    startButton.addEventListener('click', () => {
-        startMenu.classList.toggle('hidden');
-    });
+    toggleStartMenu(startButton, startMenu);
     about.addEventListener('click', () => {
         aboutWindow.classList.remove('hidden');
-        bringToForeground(aboutWindow); // Bring the About window to the top
+        bringToForeground(aboutWindow);
         startMenu.classList.add('hidden');
     });
     aboutCloseBtn.addEventListener('click', () => {
@@ -53,117 +52,41 @@ document.addEventListener("DOMContentLoaded", () => {
     openTableView.addEventListener('click', () => {
         tableWindow.classList.remove('hidden');
         startMenu.classList.add('hidden');
-        bringToForeground(tableWindow); // Ensure it is brought to the foreground when opened
+        bringToForeground(tableWindow);
     });
     closeBtn.addEventListener('click', () => {
         tableWindow.classList.add('hidden');
     });
     openParallelView.addEventListener('click', () => {
-        parallelWindow.classList.remove('hidden');
+        if (parsedData && parsedData.length > 0) {
+            parallelWindow.classList.remove('hidden');
+            renderParallelCoordinatesD3Canvas(parsedData);
+            bringToForeground(parallelWindow);
+        }
+        else {
+            console.warn("No data loaded yet!");
+        }
         startMenu.classList.add('hidden');
-        renderParallelCoordinatesD3Canvas(parsedData); // Updated function call
-        bringToForeground(parallelWindow); // Ensure it is brought to the foreground when opened
     });
     parallelCloseBtn.addEventListener('click', () => {
         parallelWindow.classList.add('hidden');
     });
-    // Dragging windows
-    function makeDraggable(header, windowElement) {
-        let isDragging = false;
-        let offsetX = 0, offsetY = 0;
-        header.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - windowElement.offsetLeft;
-            offsetY = e.clientY - windowElement.offsetTop;
-            bringToForeground(windowElement); // Bring to foreground when dragging starts
-        });
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                const desktop = document.getElementById('desktop');
-                const desktopRect = desktop.getBoundingClientRect();
-                const windowRect = windowElement.getBoundingClientRect();
-                // Calculate new position
-                let newLeft = e.clientX - offsetX;
-                let newTop = e.clientY - offsetY;
-                // Boundary checks
-                if (newLeft < desktopRect.left) {
-                    newLeft = desktopRect.left;
-                }
-                if (newTop < desktopRect.top + document.getElementById('stats-panel').offsetHeight) {
-                    newTop = desktopRect.top + document.getElementById('stats-panel').offsetHeight;
-                }
-                if (newLeft + windowRect.width > desktopRect.right) {
-                    newLeft = desktopRect.right - windowRect.width;
-                }
-                if (newTop + windowRect.height > desktopRect.bottom - document.getElementById('taskbar').offsetHeight) {
-                    newTop = desktopRect.bottom - windowRect.height - document.getElementById('taskbar').offsetHeight;
-                }
-                // Set new position
-                windowElement.style.left = `${newLeft}px`;
-                windowElement.style.top = `${newTop}px`;
-            }
-        });
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-    }
     makeDraggable(tableWindow.querySelector('.window-header'), tableWindow);
     makeDraggable(parallelWindow.querySelector('.window-header'), parallelWindow);
-    // File input change handler
-    let parsedData;
-    fileInput.addEventListener('change', (event) => {
-        var _a;
-        const file = (_a = event.target.files) === null || _a === void 0 ? void 0 : _a[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const csvData = e.target.result;
-                const data = parseCSV(csvData); // Define `data` here
-                parsedData = data; // Save the parsed data globally
-                const stats = calculateStats(data, file.name, file.size);
-                const classIndex = data[0].findIndex((header) => header.toLowerCase() === 'class'); // Type `header`
-                const rows = data.slice(1); // Get rows separately
-                const uniqueClasses = Array.from(new Set(rows.map((row) => row[classIndex]))); // Type `row`
-                const classColors = generateClassColors(uniqueClasses.length);
-                const classColorMap = new Map(uniqueClasses.map((cls, i) => [cls, classColors[i]]));
-                showStatsPanel(stats, classColorMap, uniqueClasses);
-                renderTable(parsedData);
-                tableWindow.classList.remove('hidden'); // Show window when data is loaded
-                bringToForeground(tableWindow); // Ensure it is brought to the foreground when loaded
-            };
-            reader.readAsText(file);
-        }
+    makeDraggable(aboutWindow.querySelector('.window-header'), aboutWindow);
+    handleFileInput(fileInput, (data) => {
+        parsedData = data;
+        const stats = calculateStats(data, fileInput.files[0].name, fileInput.files[0].size);
+        const classIndex = data[0].findIndex(header => header.toLowerCase() === 'class');
+        const rows = data.slice(1);
+        const uniqueClasses = Array.from(new Set(rows.map(row => row[classIndex])));
+        const classColors = generateClassColors(uniqueClasses.length);
+        const classColorMap = new Map(uniqueClasses.map((cls, i) => [cls, classColors[i]]));
+        showStatsPanel(stats, classColorMap, uniqueClasses, statsPanel);
+        renderTable(parsedData);
+        tableWindow.classList.remove('hidden');
+        bringToForeground(tableWindow);
     });
-    function parseCSV(data) {
-        return data.trim().split('\n').map(row => row.split(','));
-    }
-    function calculateStats(data, fileName, fileSize) {
-        const headers = data[0];
-        const caseCount = data.length - 1;
-        const attributeCount = headers.length - 1;
-        const classColumn = headers.find(header => header.toLowerCase() === 'class');
-        const classIndex = classColumn ? headers.indexOf(classColumn) : -1;
-        const classCount = classIndex > -1 ? new Set(data.slice(1).map(row => row[classIndex])).size : 0;
-        const datasetSize = (fileSize / 1024).toFixed(2); // Convert to KB
-        return { fileName, caseCount, attributeCount, classCount, datasetSize };
-    }
-    function showStatsPanel(stats, classColorMap, uniqueClasses) {
-        let classSwatches = uniqueClasses.map(cls => {
-            const color = classColorMap.get(cls);
-            return `
-                <span class="class-swatch" style="background-color: ${color};"></span>${cls}
-            `;
-        }).join(" | ");
-        statsPanel.innerHTML = `
-            Currently loaded dataset: ${stats.fileName} |
-            ${stats.caseCount} cases |
-            ${stats.attributeCount} attributes |
-            ${stats.classCount} unique classes |
-            ${stats.datasetSize} KB |
-            Classes: ${classSwatches}
-        `;
-        statsPanel.classList.remove('hidden');
-    }
     function renderTable(data) {
         const table = document.createElement('table');
         const headerRow = document.createElement('tr');
@@ -182,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             table.appendChild(tr);
         });
-        tableView.innerHTML = ''; // Clear any existing table
+        tableView.innerHTML = '';
         tableView.appendChild(table);
         tableView.classList.remove('hidden');
     }
@@ -191,21 +114,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const ctx = canvas.getContext('2d');
         const margin = { top: 50, right: 50, bottom: 50, left: 50 };
         const headerHeight = 600;
-        const attributeCount = data[0].length - 1; // Subtracting one for the class column
-        // Dynamically adjust the width of the canvas based on the number of attributes
+        const attributeCount = data[0].length - 1;
         const plotWidth = Math.max(1000, 150 * attributeCount);
         const plotHeight = headerHeight - margin.top - margin.bottom;
-        // Adjust the canvas width
         canvas.width = plotWidth + margin.left + margin.right;
         canvas.height = headerHeight;
-        const headers = data[0].filter(header => header.toLowerCase() !== 'class'); // Filter out the class column
+        const headers = data[0].filter(header => header.toLowerCase() !== 'class');
         const rows = data.slice(1);
-        // Identify the class column and create a color mapping
         const classIndex = data[0].findIndex(header => header.toLowerCase() === 'class');
         const uniqueClasses = Array.from(new Set(rows.map(row => row[classIndex])));
         const classColors = generateClassColors(uniqueClasses.length);
         const classColorMap = new Map(uniqueClasses.map((cls, i) => [cls, classColors[i]]));
-        // Set up scales
         const yScales = headers.map((header, i) => {
             return d3.scaleLinear()
                 .domain(d3.extent(rows, (row) => parseFloat(row[i])))
@@ -214,9 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const xScale = d3.scalePoint()
             .domain(d3.range(headers.length))
             .range([0, plotWidth]);
-        // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Draw axes
         headers.forEach((header, i) => {
             const x = xScale(i) + margin.left;
             ctx.beginPath();
@@ -224,10 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.lineTo(x, headerHeight - margin.bottom);
             ctx.stroke();
         });
-        // Draw lines with color based on class
         rows.forEach(row => {
             const classValue = row[classIndex];
-            const lineColor = classColorMap.get(classValue) || "rgba(0, 0, 0, 0.5)"; // Fallback to a default color
+            const lineColor = classColorMap.get(classValue) || "rgba(0, 0, 0, 0.5)";
             ctx.beginPath();
             headers.forEach((header, i) => {
                 const x = xScale(i) + margin.left;
@@ -242,51 +158,8 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.strokeStyle = lineColor;
             ctx.stroke();
         });
-        // Apply horizontal scrolling
         parallelView.style.overflowX = "auto";
         parallelView.style.width = "100%";
         canvas.style.width = `${plotWidth + margin.left + margin.right}px`;
-    }
-    // Call this function when you want to render the parallel coordinates
-    openParallelView.addEventListener('click', () => {
-        parallelWindow.classList.remove('hidden');
-        startMenu.classList.add('hidden');
-        renderParallelCoordinatesD3Canvas(parsedData); // Corrected function call
-    });
-    function generateClassColors(numClasses) {
-        return Array.from({ length: numClasses }, (_, i) => {
-            const hue = i / numClasses;
-            const rgb = HSVtoRGB(hue, 1, 1);
-            return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-        });
-    }
-    function HSVtoRGB(h, s, v) {
-        const i = Math.floor(h * 6);
-        const f = h * 6 - i;
-        const p = v * (1 - s);
-        const q = v * (1 - f * s);
-        const t = v * (1 - (1 - f) * s);
-        let r = 0, g = 0, b = 0; // Initialize with default values
-        switch (i % 6) {
-            case 0:
-                r = v, g = t, b = p;
-                break;
-            case 1:
-                r = q, g = v, b = p;
-                break;
-            case 2:
-                r = p, g = v, b = t;
-                break;
-            case 3:
-                r = p, g = q, b = v;
-                break;
-            case 4:
-                r = t, g = p, b = v;
-                break;
-            case 5:
-                r = v, g = p, b = q;
-                break;
-        }
-        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
     }
 });

@@ -93,10 +93,6 @@ body, html {
     overflow-x: auto;
 }
 
-.hidden {
-    display: none;
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
