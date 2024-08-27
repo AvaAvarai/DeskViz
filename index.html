@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VizDesk</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
     <div id="desktop">
@@ -31,7 +31,9 @@
                     <button id="parallel-close-btn">X</button>
                 </span>
             </div>
-            <div id="parallel-view" class="window-content"></div>
+            <div id="parallel-view" class="window-content">
+                <canvas id="parallelCanvas" width="1000" height="600"></canvas>
+            </div>
         </div>
     </div>
     

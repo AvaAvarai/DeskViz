@@ -1,4 +1,4 @@
-declare var Plotly: any;
+declare var d3: any;
 
 document.addEventListener("DOMContentLoaded", () => {
     // Existing elements
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     openParallelView.addEventListener('click', () => {
         parallelWindow.classList.remove('hidden');
         startMenu.classList.add('hidden');
-        renderParallelCoordinates(parsedData); // Assuming parsedData is available globally
+        renderParallelCoordinatesD3Canvas(parsedData); // Updated function call
     });
 
     parallelCloseBtn.addEventListener('click', () => {
@@ -157,64 +157,86 @@ document.addEventListener("DOMContentLoaded", () => {
         tableView.classList.remove('hidden');
     }
 
-    function renderParallelCoordinates(data: string[][]) {
-        const headers = data[0];
-        const rows = data.slice(1);
+    function renderParallelCoordinatesD3Canvas(data: string[][]) {
+        const canvas = document.getElementById('parallelCanvas') as HTMLCanvasElement;
+        const ctx = canvas.getContext('2d')!;
         
-        // Identify class column and unique classes
-        const classIndex = headers.findIndex(header => header.toLowerCase() === 'class');
-        if (classIndex === -1) {
-            console.error("Class column not found!");
-            return;
-        }
-        
-        const uniqueClasses = Array.from(new Set(rows.map(row => row[classIndex])));
-        
-        // Generate distinct colors for each class
-        const classColors = generateClassColors(uniqueClasses.length);
+        const margin = {top: 50, right: 50, bottom: 50, left: 50};
+        const headerHeight = 600;
+        const attributeCount = data[0].length - 1; // Subtracting one for the class column
     
-        // Map each class to its color
+        // Dynamically adjust the width of the canvas based on the number of attributes
+        const plotWidth = Math.max(1000, 150 * attributeCount);
+        const plotHeight = headerHeight - margin.top - margin.bottom;
+    
+        // Adjust the canvas width
+        canvas.width = plotWidth + margin.left + margin.right;
+        canvas.height = headerHeight;
+    
+        const headers = data[0].filter(header => header.toLowerCase() !== 'class'); // Filter out the class column
+        const rows = data.slice(1);
+    
+        // Identify the class column and create a color mapping
+        const classIndex = data[0].findIndex(header => header.toLowerCase() === 'class');
+        const uniqueClasses = Array.from(new Set(rows.map(row => row[classIndex])));
+        const classColors = generateClassColors(uniqueClasses.length);
         const classColorMap = new Map(uniqueClasses.map((cls, i) => [cls, classColors[i]]));
     
-        // Assign a numerical value to each class for coloring
-        const colorValues = rows.map(row => uniqueClasses.indexOf(row[classIndex]));
-        
-        const dimensions = headers.map((header, index) => ({
-            label: header,
-            values: rows.map(row => index === classIndex ? uniqueClasses.indexOf(row[index]) : parseFloat(row[index]) || 0), // Map class to numeric index
-        }));
+        // Set up scales
+        const yScales = headers.map((header, i) => {
+            return d3.scaleLinear()
+                .domain(d3.extent(rows, (row: string[]) => parseFloat(row[i])) as [number, number])
+                .range([plotHeight, 0]);
+        });
     
-        const plotData = [
-            {
-                type: 'parcoords',
-                line: {
-                    color: colorValues, // Use the numerical class index for colors
-                    colorscale: uniqueClasses.map((cls, i) => [i / (uniqueClasses.length - 1), classColorMap.get(cls)]), // Map colorscale to class colors
-                },
-                dimensions: dimensions,
-            },
-        ];
+        const xScale = d3.scalePoint()
+            .domain(d3.range(headers.length))
+            .range([0, plotWidth]);
     
-        // Dynamically adjust the width of the plot based on the number of dimensions
-        const plotWidth = Math.max(1000, 100 * headers.length); // Scale the width by the number of attributes
-        
-        const layout = {
-            title: {
-                text: 'Parallel Coordinates Plot',
-                font: {
-                    size: 18,
-                },
-                xref: 'paper',
-                x: 0.05,
-            },
-            autosize: false,
-            width: plotWidth, // Set the width dynamically
-            margin: { l: 50, r: 50, t: 100, b: 50 }, // Adjust margins if necessary
-        };
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-        Plotly.newPlot(parallelView, plotData, layout);
+        // Draw axes
+        headers.forEach((header, i) => {
+            const x = xScale(i)! + margin.left;
+            ctx.beginPath();
+            ctx.moveTo(x, margin.top);
+            ctx.lineTo(x, headerHeight - margin.bottom);
+            ctx.stroke();
+        });
+    
+        // Draw lines with color based on class
+        rows.forEach(row => {
+            const classValue = row[classIndex];
+            const lineColor = classColorMap.get(classValue) || "rgba(0, 0, 0, 0.5)"; // Fallback to a default color
+    
+            ctx.beginPath();
+            headers.forEach((header, i) => {
+                const x = xScale(i)! + margin.left;
+                const y = yScales[i](parseFloat(row[data[0].indexOf(header)]))! + margin.top;
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.strokeStyle = lineColor;
+            ctx.stroke();
+        });
+    
+        // Apply horizontal scrolling
+        parallelView.style.overflowX = "auto";
+        parallelView.style.width = "100%";
+        canvas.style.width = `${plotWidth + margin.left + margin.right}px`;
     }    
-    
+
+    // Call this function when you want to render the parallel coordinates
+    openParallelView.addEventListener('click', () => {
+        parallelWindow.classList.remove('hidden');
+        startMenu.classList.add('hidden');
+        renderParallelCoordinatesD3Canvas(parsedData); // Corrected function call
+    });
+
     function generateClassColors(numClasses: number): string[] {
         return Array.from({ length: numClasses }, (_, i) => {
             const hue = i / numClasses;
