@@ -63,7 +63,6 @@ body, html {
 
 #table-view {
     padding: 10px;
-    margin-top: 50px; /* Ensure table view is below the stats panel */
     font-family: Arial, sans-serif;
     font-size: 14px;
     overflow-x: auto;
@@ -86,8 +85,6 @@ th, td {
     padding: 8px;
     text-align: left;
 }
-
-/* Existing styles ... */
 
 .window {
     position: absolute;

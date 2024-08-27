@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     about.addEventListener('click', () => {
-        alert('This is VizDesk, a simulated desktop application for data visualization.');
+        alert('What if there was a locally 🏠 sessioned computer desktop 🖥️ metaphor for data science 📈 and visualization tools 🛠️?');
         startMenu.classList.add('hidden');
     });
 
