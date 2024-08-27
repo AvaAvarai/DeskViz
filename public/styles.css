@@ -1,0 +1,66 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#desktop {
+    width: 100%;
+    height: 100%;
+    background: #0078D7; /* Windows blue */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 24px;
+}
+
+#taskbar {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    background-color: #333;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    color: white;
+}
+
+#start-button {
+    background-color: #444;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+#start-menu {
+    position: absolute;
+    bottom: 40px;
+    left: 10px;
+    width: 150px;
+    background-color: #444;
+    color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#start-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#start-menu ul li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+#start-menu ul li:hover {
+    background-color: #555;
+}
+
+.hidden {
+    display: none;
+}
