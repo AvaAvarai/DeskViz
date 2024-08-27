@@ -1,4 +1,4 @@
-# DeskViz
+# VizDesk
 
 What if there was a locally 🏠 sessioned computer desktop 🖥️ metaphor for data science 📈 and visualization tools 🛠️?
 
