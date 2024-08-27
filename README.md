@@ -2,7 +2,7 @@
 
 What if there was a locally 🏠 sessioned computer desktop 🖥️ metaphor for data science 📈 and visualization tools 🛠️?
 
-![Current Version Here](https://avaavarai.github.io/VizDesk/)
+[Current Live Version Here (data still processed locally on your device.)](https://avaavarai.github.io/VizDesk/)
 
 ## License
 
