@@ -31,7 +31,7 @@ body, html {
 }
 
 #stats-panel {
-    background-color: #333;
+    background-color: #32636b;
     color: white;
     padding: 10px;
     text-align: left;
@@ -160,7 +160,15 @@ th, td {
     padding: 10px;
 }
 
-/* Hidden class */
 .hidden {
     display: none;
+}
+
+.class-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    border: 1px solid #000;
+    vertical-align: middle;
 }

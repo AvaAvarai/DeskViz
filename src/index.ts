@@ -118,9 +118,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const csvData = (e.target as FileReader).result as string;
-                parsedData = parseCSV(csvData); // Save the parsed data globally
-                const stats = calculateStats(parsedData, file.name, file.size);
-                showStatsPanel(stats);
+                const data: string[][] = parseCSV(csvData); // Define `data` here
+                parsedData = data; // Save the parsed data globally
+                const stats = calculateStats(data, file.name, file.size);
+    
+                const classIndex = data[0].findIndex((header: string) => header.toLowerCase() === 'class'); // Type `header`
+                const rows = data.slice(1); // Get rows separately
+                const uniqueClasses = Array.from(new Set(rows.map((row: string[]) => row[classIndex]))); // Type `row`
+                const classColors = generateClassColors(uniqueClasses.length);
+                const classColorMap: Map<string, string> = new Map(uniqueClasses.map((cls, i) => [cls, classColors[i]]));
+    
+                showStatsPanel(stats, classColorMap, uniqueClasses);
                 renderTable(parsedData);
                 tableWindow.classList.remove('hidden'); // Show window when data is loaded
                 bringToForeground(tableWindow); // Ensure it is brought to the foreground when loaded
@@ -145,13 +153,21 @@ document.addEventListener("DOMContentLoaded", () => {
         return { fileName, caseCount, attributeCount, classCount, datasetSize };
     }
 
-    function showStatsPanel(stats: any) {
+    function showStatsPanel(stats: any, classColorMap: Map<string, string>, uniqueClasses: string[]) {
+        let classSwatches = uniqueClasses.map(cls => {
+            const color = classColorMap.get(cls);
+            return `
+                <span class="class-swatch" style="background-color: ${color};"></span>${cls}
+            `;
+        }).join(" | ");
+    
         statsPanel.innerHTML = `
             Currently loaded dataset: ${stats.fileName} |
             ${stats.caseCount} cases |
             ${stats.attributeCount} attributes |
             ${stats.classCount} unique classes |
-            ${stats.datasetSize} KB
+            ${stats.datasetSize} KB |
+            Classes: ${classSwatches}
         `;
         statsPanel.classList.remove('hidden');
     }

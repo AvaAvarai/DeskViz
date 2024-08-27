@@ -1,12 +1,13 @@
 # VizDesk
 
-[This project is currently under construction. 🚧]
-What if there was a local 🏠 desktop 🖥️ metaphor for data science 📈 and visualization 🛠️?
+[This project is currently under construction. 🚧]  
+What if there was a local 🏠 desktop 🖥️ metaphor for data science 📈 and visualization 🛠️?  
 Utilizing Visual Knwoledge Discovery and Machine Learning techniques developed at @CWU-VKD-LAB in a user-accessible and intuitive platform.
 
 [Current Live Version Here (data still processed locally on your device.)](https://avaavarai.github.io/VizDesk/)
 
 ![Early concept screenshot](early_concept_screenshot.png)
+![Early screenshot](early_screenshot.png)
 
 ## Data Format
 
