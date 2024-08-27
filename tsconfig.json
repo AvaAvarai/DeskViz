@@ -9,5 +9,5 @@
     "forceConsistentCasingInFileNames": true,  // Ensure consistent casing in imports
     "skipLibCheck": true                       // Skip type checking of declaration files (.d.ts)
   },
-  "include": ["src/**/*"]                      // Include all TypeScript files in the src directory
+  "include": ["src/**/*", "index.ts"]                      // Include all TypeScript files in the src directory
 }
