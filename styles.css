@@ -2,6 +2,7 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow: hidden;
     font-family: Arial, sans-serif;
 }
 
@@ -102,6 +103,15 @@ th, td {
     resize: both;
     overflow: hidden;
     z-index: 1001;
+}
+
+#desktop {
+    position: absolute;
+    top: 50px; /* Height of the stats panel */
+    bottom: 40px; /* Height of the taskbar */
+    width: 100%;
+    overflow: hidden;
+    background-color: hsl(188, 100%, 42%); /* Background color for the desktop */
 }
 
 .window-header {
