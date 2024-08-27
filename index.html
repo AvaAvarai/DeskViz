@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VizDesk</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <div id="desktop">
@@ -21,7 +22,19 @@
             </div>
             <div id="table-view" class="window-content"></div>
         </div>
+
+        <!-- Parallel coordinates window -->
+        <div id="parallel-window" class="window hidden">
+            <div class="window-header">
+                <span id="parallel-window-title">Parallel Coordinates</span>
+                <span class="window-controls">
+                    <button id="parallel-close-btn">X</button>
+                </span>
+            </div>
+            <div id="parallel-view" class="window-content"></div>
+        </div>
     </div>
+    
     <div id="taskbar">
         <div id="start-button">Start</div>
         <div id="start-menu" class="hidden">
@@ -30,6 +43,7 @@
                 <li id="see-code">See the Code</li>
                 <li id="load-csv">Load CSV</li>
                 <li id="open-table-view">Open Table View</li>
+                <li id="open-parallel-view">Parallel Coordinates</li>
             </ul>
         </div>
     </div>

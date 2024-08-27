@@ -1,4 +1,7 @@
+declare var Plotly: any;
+
 document.addEventListener("DOMContentLoaded", () => {
+    // Existing elements
     const startButton = document.getElementById('start-button') as HTMLElement;
     const startMenu = document.getElementById('start-menu') as HTMLElement;
     const about = document.getElementById('about') as HTMLElement;
@@ -10,6 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableView = document.getElementById('table-view') as HTMLElement;
     const tableWindow = document.getElementById('table-window') as HTMLElement;
     const closeBtn = document.getElementById('close-btn') as HTMLElement;
+
+    // Parallel coordinates elements
+    const openParallelView = document.getElementById('open-parallel-view') as HTMLElement;
+    const parallelWindow = document.getElementById('parallel-window') as HTMLElement;
+    const parallelView = document.getElementById('parallel-view') as HTMLElement;
+    const parallelCloseBtn = document.getElementById('parallel-close-btn') as HTMLElement;
 
     // Toggle start menu
     startButton.addEventListener('click', () => {
@@ -40,28 +49,44 @@ document.addEventListener("DOMContentLoaded", () => {
         tableWindow.classList.add('hidden');
     });
 
-    // Dragging the window
-    let isDragging = false;
-    let offsetX = 0, offsetY = 0;
-
-    const windowHeader = tableWindow.querySelector('.window-header') as HTMLElement;
-
-    windowHeader.addEventListener('mousedown', (e: MouseEvent) => {
-        isDragging = true;
-        offsetX = e.clientX - tableWindow.offsetLeft;
-        offsetY = e.clientY - tableWindow.offsetTop;
+    openParallelView.addEventListener('click', () => {
+        parallelWindow.classList.remove('hidden');
+        startMenu.classList.add('hidden');
+        renderParallelCoordinates(parsedData); // Assuming parsedData is available globally
     });
 
-    document.addEventListener('mousemove', (e: MouseEvent) => {
-        if (isDragging) {
-            tableWindow.style.left = `${e.clientX - offsetX}px`;
-            tableWindow.style.top = `${e.clientY - offsetY}px`;
-        }
+    parallelCloseBtn.addEventListener('click', () => {
+        parallelWindow.classList.add('hidden');
     });
 
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
+    // Dragging windows
+    function makeDraggable(header: HTMLElement, windowElement: HTMLElement) {
+        let isDragging = false;
+        let offsetX = 0, offsetY = 0;
+
+        header.addEventListener('mousedown', (e: MouseEvent) => {
+            isDragging = true;
+            offsetX = e.clientX - windowElement.offsetLeft;
+            offsetY = e.clientY - windowElement.offsetTop;
+        });
+
+        document.addEventListener('mousemove', (e: MouseEvent) => {
+            if (isDragging) {
+                windowElement.style.left = `${e.clientX - offsetX}px`;
+                windowElement.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    }
+
+    makeDraggable(tableWindow.querySelector('.window-header') as HTMLElement, tableWindow);
+    makeDraggable(parallelWindow.querySelector('.window-header') as HTMLElement, parallelWindow);
+
+    // File input change handler
+    let parsedData: string[][];
 
     fileInput.addEventListener('change', (event) => {
         const file = (event.target as HTMLInputElement).files?.[0];
@@ -69,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const csvData = (e.target as FileReader).result as string;
-                const parsedData = parseCSV(csvData);
+                parsedData = parseCSV(csvData); // Save the parsed data globally
                 const stats = calculateStats(parsedData, file.name, file.size);
                 showStatsPanel(stats);
                 renderTable(parsedData);
@@ -131,4 +156,34 @@ document.addEventListener("DOMContentLoaded", () => {
         tableView.appendChild(table);
         tableView.classList.remove('hidden');
     }
+
+    function renderParallelCoordinates(data: string[][]) {
+        const headers = data[0];
+        const rows = data.slice(1);
+    
+        const dimensions = headers.map((header, index) => ({
+            label: header,
+            values: rows.map(row => parseFloat(row[index]) || 0), // Convert strings to numbers
+        }));
+    
+        const colors = rows.map(() => Math.random()); // Generate random colors
+    
+        const plotData = [
+            {
+                type: 'parcoords',
+                line: {
+                    color: colors,
+                    colorscale: 'Viridis',  // Color scale for lines
+                },
+                dimensions: dimensions,
+            },
+        ];
+    
+        const layout = {
+            title: 'Parallel Coordinates Plot',
+            margin: { l: 50, r: 50, t: 100, b: 50 },
+        };
+    
+        Plotly.newPlot(parallelView, plotData, layout);
+    }    
 });

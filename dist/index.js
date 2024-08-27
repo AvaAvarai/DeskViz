@@ -1,5 +1,6 @@
 "use strict";
 document.addEventListener("DOMContentLoaded", () => {
+    // Existing elements
     const startButton = document.getElementById('start-button');
     const startMenu = document.getElementById('start-menu');
     const about = document.getElementById('about');
@@ -11,6 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableView = document.getElementById('table-view');
     const tableWindow = document.getElementById('table-window');
     const closeBtn = document.getElementById('close-btn');
+    // Parallel coordinates elements
+    const openParallelView = document.getElementById('open-parallel-view');
+    const parallelWindow = document.getElementById('parallel-window');
+    const parallelView = document.getElementById('parallel-view');
+    const parallelCloseBtn = document.getElementById('parallel-close-btn');
     // Toggle start menu
     startButton.addEventListener('click', () => {
         startMenu.classList.toggle('hidden');
@@ -34,24 +40,37 @@ document.addEventListener("DOMContentLoaded", () => {
     closeBtn.addEventListener('click', () => {
         tableWindow.classList.add('hidden');
     });
-    // Dragging the window
-    let isDragging = false;
-    let offsetX = 0, offsetY = 0;
-    const windowHeader = tableWindow.querySelector('.window-header');
-    windowHeader.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        offsetX = e.clientX - tableWindow.offsetLeft;
-        offsetY = e.clientY - tableWindow.offsetTop;
+    openParallelView.addEventListener('click', () => {
+        parallelWindow.classList.remove('hidden');
+        startMenu.classList.add('hidden');
+        renderParallelCoordinates(parsedData); // Assuming parsedData is available globally
     });
-    document.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-            tableWindow.style.left = `${e.clientX - offsetX}px`;
-            tableWindow.style.top = `${e.clientY - offsetY}px`;
-        }
+    parallelCloseBtn.addEventListener('click', () => {
+        parallelWindow.classList.add('hidden');
     });
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
+    // Dragging windows
+    function makeDraggable(header, windowElement) {
+        let isDragging = false;
+        let offsetX = 0, offsetY = 0;
+        header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - windowElement.offsetLeft;
+            offsetY = e.clientY - windowElement.offsetTop;
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                windowElement.style.left = `${e.clientX - offsetX}px`;
+                windowElement.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    }
+    makeDraggable(tableWindow.querySelector('.window-header'), tableWindow);
+    makeDraggable(parallelWindow.querySelector('.window-header'), parallelWindow);
+    // File input change handler
+    let parsedData;
     fileInput.addEventListener('change', (event) => {
         var _a;
         const file = (_a = event.target.files) === null || _a === void 0 ? void 0 : _a[0];
@@ -59,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const csvData = e.target.result;
-                const parsedData = parseCSV(csvData);
+                parsedData = parseCSV(csvData); // Save the parsed data globally
                 const stats = calculateStats(parsedData, file.name, file.size);
                 showStatsPanel(stats);
                 renderTable(parsedData);
@@ -112,5 +131,29 @@ document.addEventListener("DOMContentLoaded", () => {
         tableView.innerHTML = ''; // Clear any existing table
         tableView.appendChild(table);
         tableView.classList.remove('hidden');
+    }
+    function renderParallelCoordinates(data) {
+        const headers = data[0];
+        const rows = data.slice(1);
+        const dimensions = headers.map((header, index) => ({
+            label: header,
+            values: rows.map(row => parseFloat(row[index]) || 0), // Convert strings to numbers
+        }));
+        const colors = rows.map(() => Math.random()); // Generate random colors
+        const plotData = [
+            {
+                type: 'parcoords',
+                line: {
+                    color: colors,
+                    colorscale: 'Viridis', // Color scale for lines
+                },
+                dimensions: dimensions,
+            },
+        ];
+        const layout = {
+            title: 'Parallel Coordinates Plot',
+            margin: { l: 50, r: 50, t: 100, b: 50 },
+        };
+        Plotly.newPlot(parallelView, plotData, layout);
     }
 });
