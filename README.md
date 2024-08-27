@@ -11,6 +11,8 @@ Utilizing Visual Knwoledge Discovery and Machine Learning techniques developed a
 
 ## Data Format
 
+Ready to use datasets can be found in the `datasets` directory, download and pick with the CSV file picker in the application.
+
 Data loaded must be in CSV format. First csv row is always column headers, whichever label has a header of `class` case-insensitive is denoted the label column.
 
 ## Project Setup
